@@ -4,13 +4,8 @@
 Created on Tue Mar 13 10:46:43 2018
 Updated on Wed Dec 12 13:27 2019
 @author: gracer
+This is a script to parse the onset files from psychopy to FSL readable format. There is an additonal option to create a "sanity check" plot to ensure it is working.
 """
-
-#!/usr/bin/python
-#get onsets
-
-
-import numpy
 import os
 import glob
 import pdb
@@ -48,9 +43,6 @@ def plottin(df, arglist):
         ax.annotate(r, xy=(d, l), xytext=(-3, np.sign(l)*3),textcoords="offset points",
                      va=va, ha="center")
 
-    # format xaxis with 4 month intervals
-    # ax.get_xaxis().set_major_locator(mdates.MonthLocator(interval=4))
-    # ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%b %Y"))
     plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
 
     # remove y axis and spines
@@ -197,8 +189,7 @@ def parsely(arglist):
         DF.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-ALL-run-%s.csv'%(sub,run)))
         if arglist['PLOT'] == True:
             plottin(DF, arglist)
-        # DF=DF.sort_values('onsets')
-        # pdb.set_trace()
+
 
 
 def main():
@@ -219,61 +210,3 @@ def main():
         arglist[a[0]]=a[1]
     parsely(arglist)
 main()
-"""
-        r_onsets=(numpy.asarray(rinse,dtype=float))-start_time
-        TT_onsets=(numpy.asarray(TT_onset,dtype=float))-start_time
-        UU_onsets=(numpy.asarray(UU_onset,dtype=float))-start_time
-        NN_onsets=(numpy.asarray(NN_onset,dtype=float))-start_time
-
-        Tcue_onsets=(numpy.asarray(tasty_cue_onsets,dtype=float))-start_time
-        Ucue_onsets=(numpy.asarray(nottasty_cue_onsets,dtype=float))-start_time
-        Ncue_onsets=(numpy.asarray(neu_cue_onsets,dtype=float))-start_time
-
-        files2make=['rinse','TT','UU','NN','Tcue','Ucue','Ncue']
-        mydict={}
-        try:
-            for files in files2make:
-                path='/Users/gracer/Desktop/Output/test/%s_%s_%s_%s.txt'%(sub,session,files,run)
-                if os.path.exists(path) == True:
-                    print ('exists')
-                    break
-                else:
-                    mydict[files] = path
-            f_rinse=open(mydict['rinse'], 'w')
-            for t in range(len(r_onsets)):
-                f_rinse.write('%f\t3\t1\n'%(r_onsets[t]))
-            f_rinse.close()
-
-            f_TT=open(mydict['TT'], 'w')
-            for t in range(len(TT_onsets)):
-                f_TT.write('%f\t6\t1\n' %(TT_onsets[t]))
-            f_TT.close()
-
-            f_Tcue=open(mydict['Tcue'], 'w')
-            for t in range(len(Tcue_onsets)):
-                f_Tcue.write('%f\t1\t1\n' %(Tcue_onsets[t]))
-            f_Tcue.close()
-
-            f_UU=open(mydict['UU'], 'w')
-            for t in range(len(UU_onsets)):
-                f_UU.write('%f\t6\t1\n' %UU_onsets[t])
-            f_UU.close()
-
-            f_Ucue=open(mydict['Ucue'], 'w')
-            for t in range(len(Ucue_onsets)):
-                f_Ucue.write('%f\t1\t1\n' %(Ucue_onsets[t]))
-            f_Ucue.close()
-
-            f_NN=open(mydict['NN'], 'w')
-            for t in range(len(NN_onsets)):
-                f_NN.write('%f\t6\t1\n' %NN_onsets[t])
-            f_NN.close()
-
-            f_Ncue=open(mydict['Ncue'], 'w')
-            for t in range(len(Ncue_onsets)):
-                f_Ncue.write('%f\t1\t1\n' %(Ncue_onsets[t]))
-            f_Ncue.close()
-
-        except KeyError:
-            pass
-"""
