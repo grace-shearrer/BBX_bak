@@ -15,7 +15,7 @@ import os
 import glob
 import pdb
 import argparse
-
+import pandas as pd
 def parsely(arglist):
     # print(arglist)
     ignore = ['DATA 	Keypress: o']
@@ -48,13 +48,8 @@ def parsely(arglist):
             start_time=None
             # create 4 arrays with the cue onsets, taste onsets, cues, tastes
             for x in infile.readlines():
-                # if x.find('Keypress: q'):
-                #     continue
-                # print(x)
                 if not x.find(ignore[0])>-1:
-                    # print(x)
                     l_s=x.strip().split()
-                    # print(l_s)
                     if x.find('Level start key press')>-1:#find the start
                         l_s=x.strip().split()
                         start_time=float(l_s[0])
@@ -63,7 +58,6 @@ def parsely(arglist):
                         l_s=x.strip().split()
                         print(l_s)
                         cue_onsets.append(float(l_s[0]))
-
                     if x.find('Level image')>-1:
                         l_s=x.strip().split()
                         print(l_s)
@@ -73,6 +67,40 @@ def parsely(arglist):
                         print(l_s)
                         taste_onsets.append(l_s[0])
                         tastes.append(l_s[8])
+                    if x.find('Level RINSE 	25')>-1:
+                        rinse.append(l_s[0])
+        print("got the arrays time to adjust onsets")
+        columnTitles = ['onsets', 'duration', 'metric']
+        # CUES
+        cue_df = pd.DataFrame(
+            {'onsets': cue_onsets,
+             'metric': cues
+            })
+        cue_df['duration']='1'
+        cue_df = cue_df.reindex(columns=columnTitles)
+        cue_df['onsets']=cue_df['onsets']-start_time
+        H2O_df=cue_df.loc[cue_df['metric'] == 'image=water.jpg']
+        SSBcue = ['image=CO.jpg','image=SL.jpg']
+        SSBcue_df=cue_df.loc[(cue_df['metric'] == SSBcue[0]) | (cue_df['metric'] == SSBcue[1])]
+        USBcue = ['image=UCO.jpg','image=USL.jpg']
+        USBcue_df=cue_df.loc[(cue_df['metric'] == USBcue[0]) | (cue_df['metric'] == USBcue[1])]
+        # TASTES
+        taste_df = pd.DataFrame(
+            {'onsets': taste_onsets,
+             'metric':tastes
+            })
+        taste_df['duration']='6'
+        taste_df['onsets']=taste_df['onsets'].astype('float32')-start_time
+        taste_df = taste_df.reindex(columns=columnTitles)
+        H2O_df=taste_df.loc[taste_df['metric'] == '0']
+        SSB_df=taste_df.loc[taste_df['metric'] == '1']
+        USB_df=taste_df.loc[taste_df['metric'] == '2']
+        # RINSE
+        rinse_df = pd.DataFrame(
+            {'onsets': rinse
+            })
+        rinse_df['duration']=3
+        rinse_df['metric']=1
 
 
         pdb.set_trace()
@@ -95,42 +123,6 @@ def main():
     parsely(arglist)
 main()
 """
-            if not x.find(ignore[0])>-1 or x.find(ignore[1])>-1:
-
-                l_s=x.strip().split()
-                print l_s
-
-                if x.find('Level start key press')>-1:#find the start
-                    l_s=x.strip().split()
-                    start_time=float(l_s[0])
-                if x.find('Level image')>-1:
-                    l_s=x.strip().split()
-                    print(l_s)
-                    cue_onsets.append(float(l_s[0]))
-                    cues.append(l_s[2])
-
-                    if l_s[2] == 'image=SL.jpg' or l_s[2] == 'image=CO.jpg':
-                        tasty_cue.append(l_s[2])
-                        tasty_cue_onsets.append(float(l_s[0]))
-                    if l_s[2] == 'image=USL.jpg' or l_s[2] == 'image=UCO.jpg':
-                        nottasty_cue.append(l_s[2])
-                        nottasty_cue_onsets.append(float(l_s[0]))
-                    if l_s[2] == 'image=water.jpg':
-                        neu_cue.append(l_s[2])
-                        neu_cue_onsets.append(float(l_s[0]))
-                if x.find('Level injecting via pump at address ')>-1:#find the tasty image
-                    l_s=x.strip().split()
-                    print(l_s)
-
-                    if l_s[7] == '0':
-                        NN_onset.append(l_s[0])
-                    if l_s[7] == '1':
-                        TT_onset.append(l_s[0])
-                    if l_s[7] == '2':
-                        UU_onset.append(l_s[0])
-                if x.find('Level RINSE 	25')>-1:
-                    rinse.append(l_s[0])
-
         r_onsets=(numpy.asarray(rinse,dtype=float))-start_time
         TT_onsets=(numpy.asarray(TT_onset,dtype=float))-start_time
         UU_onsets=(numpy.asarray(UU_onset,dtype=float))-start_time
