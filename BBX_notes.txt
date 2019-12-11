@@ -1,0 +1,26 @@
+Grace check notes:
+
+# Level 3 (group)
+Thresh  min == 3
+zstat images
+ 
+Cope1 SSBcue > baseline
+- lack of visual cortex
+- more so taste areas
+- filter_func shows few active voxels in visual areas
+Cope2 USBcue > baseline
+- lack of visual cortex
+- more so taste areas
+Cope3 H2Ocue > baseline
+- strong taste areas
+- no visual 
+Cope4 SSBtaste > baseline
+- taste areas
+Cope5 USBtaste > baseline
+- taste areas
+Cope6 H2O > baseline 
+- really strong taste
+
+# Level 1 (single run)
+Rinse (EV 7) gamma convolution, needs to be double gamma HRF (DG HRF)
+Moco regressors should have "none" convolution (rn DG HRF)
