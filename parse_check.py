@@ -26,7 +26,7 @@ def parsely(arglist):
         #define all the strings
         fi=file.split('/')[-1]
         sub=fi.split('_')[1]
-        run=file.split('_')[2]
+        run=file.split('_')[2].split('0')[-1]
         session=arglist['WAVE']
         print('this is the subject %s\nthis is the run %s'%(sub,run))
 
@@ -35,15 +35,6 @@ def parsely(arglist):
             cues=[]
             taste_onsets=[]
             tastes=[]
-            SSB_taste_onset=[]
-            USB_taste_onset=[]
-            H2O_taste_onset=[]
-            SSB_cue_onsets=[]
-            SSB_cue=[]
-            USB_cue_onsets=[]
-            USB_cue=[]
-            H2O_cue_onsets=[]
-            H2O_cue=[]
             rinse=[]
             start_time=None
             # create 4 arrays with the cue onsets, taste onsets, cues, tastes
@@ -56,15 +47,15 @@ def parsely(arglist):
                         print(start_time)
                     if x.find('Level onset of trial')>-1:
                         l_s=x.strip().split()
-                        print(l_s)
+                        # print(l_s)
                         cue_onsets.append(float(l_s[0]))
                     if x.find('Level image')>-1:
                         l_s=x.strip().split()
-                        print(l_s)
+                        # print(l_s)
                         cues.append(l_s[2])
                     if x.find('Level post injecting via pump at address ')>-1:
                         l_s=x.strip().split()
-                        print(l_s)
+                        # print(l_s)
                         taste_onsets.append(l_s[0])
                         tastes.append(l_s[8])
                     if x.find('Level RINSE 	25')>-1:
@@ -79,11 +70,22 @@ def parsely(arglist):
         cue_df['duration']='1'
         cue_df = cue_df.reindex(columns=columnTitles)
         cue_df['onsets']=cue_df['onsets']-start_time
-        H2O_df=cue_df.loc[cue_df['metric'] == 'image=water.jpg']
+        ## make individual dataframes
+        ### H2O cue
+        H2Ocue_df=cue_df.loc[cue_df['metric'] == 'image=water.jpg']
+        H2Ocue_df['metric'].replace({'image=water.jpg': 1}, inplace=True)
+        # sub-001_task-H2Ocue_run-1
+        H2Ocue_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-H2Ocue-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
+        ### SSB cue
         SSBcue = ['image=CO.jpg','image=SL.jpg']
         SSBcue_df=cue_df.loc[(cue_df['metric'] == SSBcue[0]) | (cue_df['metric'] == SSBcue[1])]
+        SSBcue_df['metric'].replace({SSBcue[0]: 1, SSBcue[1]: 1}, inplace=True)
+        SSBcue_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-SSBcue-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
+        ### USB cue
         USBcue = ['image=UCO.jpg','image=USL.jpg']
         USBcue_df=cue_df.loc[(cue_df['metric'] == USBcue[0]) | (cue_df['metric'] == USBcue[1])]
+        USBcue_df['metric'].replace({USBcue[0]: 1, USBcue[1]: 1}, inplace=True)
+        USBcue_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-USBcue-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
         # TASTES
         taste_df = pd.DataFrame(
             {'onsets': taste_onsets,
@@ -92,15 +94,27 @@ def parsely(arglist):
         taste_df['duration']='6'
         taste_df['onsets']=taste_df['onsets'].astype('float32')-start_time
         taste_df = taste_df.reindex(columns=columnTitles)
+        ## make individual dataframes
+        ### H2O
         H2O_df=taste_df.loc[taste_df['metric'] == '0']
+        H2O_df['metric'].replace({'0': 1}, inplace=True)
+        H2O_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-H2O-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
+        ## SSB
         SSB_df=taste_df.loc[taste_df['metric'] == '1']
+        SSB_df['metric'].replace({'1': 1}, inplace=True)
+        SSB_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-SSB-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
+        ## USB
         USB_df=taste_df.loc[taste_df['metric'] == '2']
-        # RINSE
+        USB_df['metric'].replace({'2': 1}, inplace=True)
+        USB_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-USB-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
+        ## RINSE
         rinse_df = pd.DataFrame(
             {'onsets': rinse
             })
+        rinse_df['onsets']=rinse_df['onsets'].astype('float32')-start_time
         rinse_df['duration']=3
         rinse_df['metric']=1
+        rinse_df.to_csv(os.path.join(arglist['OUTPATH'],'%s'%session,'sub-%s_task-rinse-run-%s.tsv'%(sub,run)), header=False, index=False, sep='\t')
 
 
         pdb.set_trace()
