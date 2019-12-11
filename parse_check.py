@@ -1,7 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar 13 10:46:43 2018
+Updated on Wed Dec 12 13:27 2019
 @author: gracer
 """
 
@@ -11,45 +12,89 @@ Created on Tue Mar 13 10:46:43 2018
 
 import numpy
 import os
-import pdb
 import glob
+import pdb
+import argparse
 
-handles=[]
-basepath='/Users/gracer/Documents/Output'
-os.chdir(basepath)
+def parsely(arglist):
+    # print(arglist)
+    ignore = ['DATA 	Keypress: o']
+    handles=[]
+
+    for file in glob.glob(os.path.join(arglist['BASEPATH'],'bbx*%s*.log'%(arglist['WAVE']))):
+        print(file)
+        #define all the strings
+        fi=file.split('/')[-1]
+        sub=fi.split('_')[1]
+        run=file.split('_')[2]
+        session=arglist['WAVE']
+        print('this is the subject %s\nthis is the run %s'%(sub,run))
+
+        with open(file,'r') as infile:
+            cue_onsets=[]
+            cues=[]
+            taste_onsets=[]
+            tastes=[]
+            SSB_taste_onset=[]
+            USB_taste_onset=[]
+            H2O_taste_onset=[]
+            SSB_cue_onsets=[]
+            SSB_cue=[]
+            USB_cue_onsets=[]
+            USB_cue=[]
+            H2O_cue_onsets=[]
+            H2O_cue=[]
+            rinse=[]
+            start_time=None
+            # create 4 arrays with the cue onsets, taste onsets, cues, tastes
+            for x in infile.readlines():
+                # if x.find('Keypress: q'):
+                #     continue
+                # print(x)
+                if not x.find(ignore[0])>-1:
+                    # print(x)
+                    l_s=x.strip().split()
+                    # print(l_s)
+                    if x.find('Level start key press')>-1:#find the start
+                        l_s=x.strip().split()
+                        start_time=float(l_s[0])
+                        print(start_time)
+                    if x.find('Level onset of trial')>-1:
+                        l_s=x.strip().split()
+                        print(l_s)
+                        cue_onsets.append(float(l_s[0]))
+
+                    if x.find('Level image')>-1:
+                        l_s=x.strip().split()
+                        print(l_s)
+                        cues.append(l_s[2])
+                    if x.find('Level post injecting via pump at address ')>-1:
+                        l_s=x.strip().split()
+                        print(l_s)
+                        taste_onsets.append(l_s[0])
+                        tastes.append(l_s[8])
 
 
-ignore = ['DATA 	Keypress: o','Level post injecting via pump at address']
+        pdb.set_trace()
 
-#files = [file for file in os.listdir(".") if (file.lower().endswith('.log'))]
-#files.sort(key=os.path.getmtime)
 
-for file in glob.glob(os.path.join(basepath,'BBX*.log')):
-    print(file)
+def main():
+    parser=argparse.ArgumentParser(description='Generate FSL style onset files from logfile')
 
-    sub=file.split('/')[5].split('_')[0]
-    session=file.split('/')[5].split('_')[2]
-    run=file.split('/')[5].split('_')[1]
-    print([sub,session,run])
+    parser.add_argument('-basepath', dest='BASEPATH', action='store',
+                        default=False, help='Where dem files at boo?')
+    parser.add_argument('-wave',dest='WAVE', action='store',
+                        default=False, help='Waves don die, which we using?')
+    parser.add_argument('-outpath', dest='OUTPATH', action='store',
+                        default=False, help='Where to save these toasty toasts')
 
-    with open(file,'r') as infile:
-        cue_onsets=[]
-        TT_onset=[]
-        UU_onset=[]
-        NN_onset=[]
-        tasty_cue_onsets=[]
-        tasty_cue=[]
-        nottasty_cue_onsets=[]
-        nottasty_cue=[]
-        neu_cue_onsets=[]
-        neu_cue=[]
-        rinse=[]
-        start_time=None
-
-        for x in infile.readlines():
-#            if x.find('Keypress: q'):
-#                continue
-
+    args = parser.parse_args()
+    arglist={}
+    for a in args._get_kwargs():
+        arglist[a[0]]=a[1]
+    parsely(arglist)
+main()
+"""
             if not x.find(ignore[0])>-1 or x.find(ignore[1])>-1:
 
                 l_s=x.strip().split()
@@ -142,3 +187,4 @@ for file in glob.glob(os.path.join(basepath,'BBX*.log')):
 
         except KeyError:
             pass
+"""
