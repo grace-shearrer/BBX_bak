@@ -66,8 +66,9 @@ def parsely(arglist):
         #define all the strings
         print(file)
         fi=file.split('/')[-1]
+        print(fi)
         sub=fi.split('_')[1]
-        run=file.split('_')[2].split('0')[-1]
+        run=fi.split('_')[2].split('0')[-1]
         session=arglist['WAVE']
         arglist.update({'sub':sub})
         arglist.update({'run':run})
