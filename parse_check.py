@@ -61,10 +61,10 @@ def parsely(arglist):
     # print(arglist)
     ignore = ['DATA 	Keypress: o']
     handles=[]
-
+    print(arglist)
     for file in glob.glob(os.path.join(arglist['BASEPATH'],'bbx*%s*.log'%(arglist['WAVE']))):
-        print(file)
         #define all the strings
+        print(file)
         fi=file.split('/')[-1]
         sub=fi.split('_')[1]
         run=file.split('_')[2].split('0')[-1]
